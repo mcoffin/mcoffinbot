@@ -10,14 +10,6 @@ import (
 	"strings"
 )
 
-type channel struct {
-	Name string `toml:"name"`
-}
-
-type config struct {
-	Channels []channel `toml:"channel"`
-}
-
 var quotes = map[string]string{}
 
 func quoteHandler(enc *irc.Encoder, msg *irc.Message, next yirc.Handler) error {
@@ -41,16 +33,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var c = yirc.Client{}
-
-	// Printing middleware handler
-	c.UseHandler(yirc.HandlerFunc(func(enc *irc.Encoder, msg *irc.Message, next yirc.Handler) error {
-		fmt.Println(msg)
-		next.HandleIRC(enc, msg, nil)
-		return nil
-	}))
-
-	c.UseHandler(yirc.PingHandler)
+	var c = yirc.Classic()
 
 	c.UseHandler(yirc.HandlerFunc(func(enc *irc.Encoder, msg *irc.Message, next yirc.Handler) error {
 		if msg.Command == irc.JOIN {
@@ -70,18 +53,13 @@ func main() {
 		}
 	}))
 
-	var cmdHandler = yirc.CommandHandler{
+	var cmdHandler = CommandHandler{
 		Lead:     "!",
 		Commands: map[string]yirc.Handler{"quote": yirc.HandlerFunc(quoteHandler)},
 	}
 	c.UseHandler(cmdHandler)
 
-	var channels = make([]string, 0, len(cfg.Channels))
-	for _, ch := range cfg.Channels {
-		channels = append(channels, ch.Name)
-	}
-
-	err = c.ListenAndHandle(*addr, *nick, channels)
+	err = c.ListenAndHandle(*addr, *nick, cfg.Channels)
 	if err != nil {
 		log.Fatal(err)
 	}

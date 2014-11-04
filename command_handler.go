@@ -1,16 +1,17 @@
-package yirc
+package main
 
 import (
+	"./yirc"
 	"github.com/sorcix/irc"
 	"strings"
 )
 
 type CommandHandler struct {
 	Lead     string
-	Commands map[string]Handler
+	Commands map[string]yirc.Handler
 }
 
-func (self CommandHandler) HandleIRC(enc *irc.Encoder, msg *irc.Message, next Handler) error {
+func (self CommandHandler) HandleIRC(enc *irc.Encoder, msg *irc.Message, next yirc.Handler) error {
 	if msg.Command != irc.PRIVMSG {
 		return next.HandleIRC(enc, msg, nil)
 	}

@@ -28,6 +28,12 @@ type Client struct {
 	nick     string
 }
 
+func Classic() Client {
+	return Client{
+		Handlers: []Handler{LogHandler, PingHandler},
+	}
+}
+
 func buildMiddleware(handlers []Handler) middleware {
 	if len(handlers) == 1 {
 		return middleware{

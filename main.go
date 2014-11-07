@@ -68,6 +68,8 @@ func main() {
 
 	var c = yirc.Classic()
 
+	c.UseHandler(NewHighlightHandler())
+
 	commandMap := map[string]Command{}
 	for _, cmdCfg := range cfg.Commands {
 		commandMap[cmdCfg.Name], err = newJSCommand(cmdCfg.Script)

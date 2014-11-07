@@ -21,8 +21,8 @@ func newJSCommand(script string) (Command, error) {
 		return nil, err
 	}
 
+	vm := otto.New()
 	return CommandFunc(func(enc *irc.Encoder, cmd string, args []string, msg *irc.Message) error {
-		vm := otto.New()
 		err := vm.Set("irc", func(call otto.FunctionCall) otto.Value {
 			raw := call.Argument(0).String()
 			msg := irc.ParseMessage(raw)

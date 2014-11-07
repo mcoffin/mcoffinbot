@@ -9,3 +9,8 @@ channels = ["#ucsd"]
 
 name = "help"
 script = "commands/help.js"
+
+[[command]]
+
+name = "quit"
+script = "commands/quit.js"

@@ -3,26 +3,59 @@ package main
 import (
 	"./yirc"
 	"flag"
-	"fmt"
 	"github.com/BurntSushi/toml"
+	"github.com/robertkrimen/otto"
 	"github.com/sorcix/irc"
+	"io/ioutil"
 	"log"
-	"strings"
+	"sync"
 )
 
-var quotes = map[string]string{}
+func serverLoop(cfg server, nick string, c yirc.Client) error {
+	return c.ListenAndHandle(cfg.Address, nick, cfg.Channels)
+}
 
-func quoteHandler(enc *irc.Encoder, msg *irc.Message, next yirc.Handler) error {
-	var quot = strings.TrimPrefix(msg.Trailing, "quote ")
-	quotes[msg.Name] = quot
-	return nil
+func newJSCommand(script string) (Command, error) {
+	source, err := ioutil.ReadFile(script)
+	if err != nil {
+		return nil, err
+	}
+
+	return CommandFunc(func(enc *irc.Encoder, cmd string, args []string, msg *irc.Message) error {
+		vm := otto.New()
+		err := vm.Set("irc", func(call otto.FunctionCall) otto.Value {
+			raw := call.Argument(0).String()
+			msg := irc.ParseMessage(raw)
+			err := enc.Encode(msg)
+			if err == nil {
+				return otto.TrueValue()
+			} else {
+				return otto.FalseValue()
+			}
+		})
+		if err != nil {
+			return err
+		}
+		_, err = vm.Run(source)
+		if err != nil {
+			return err
+		}
+		jsArgs := []interface{}{msg.Params[0], cmd}
+		for _, argStr := range args {
+			jsArgs = append(jsArgs, argStr)
+		}
+		_, err = vm.Call(cmd, nil, jsArgs...)
+		if err != nil {
+			return err
+		}
+		return nil
+	}), nil
 }
 
 func main() {
 	var err error
 
 	nick := flag.String("nick", "mcoffinbot", "desired nickname")
-	addr := flag.String("addr", "irc.freenode.net:6667", "server to connect")
 	configFile := flag.String("config", "config.toml", "config file")
 
 	flag.Parse()
@@ -35,32 +68,30 @@ func main() {
 
 	var c = yirc.Classic()
 
-	c.UseHandler(yirc.HandlerFunc(func(enc *irc.Encoder, msg *irc.Message, next yirc.Handler) error {
-		if msg.Command == irc.JOIN {
-			var quote = quotes[msg.Name]
-			if quote != "" {
-				var greeting = fmt.Sprintf("<%s> %s", msg.Name, quote)
-				var greetingMessage = irc.Message{
-					Command:  irc.PRIVMSG,
-					Params:   []string{msg.Params[0]},
-					Trailing: greeting,
-				}
-				return enc.Encode(&greetingMessage)
-			}
-			return nil
-		} else {
-			return next.HandleIRC(enc, msg, nil)
+	commandMap := map[string]Command{}
+	for _, cmdCfg := range cfg.Commands {
+		commandMap[cmdCfg.Name], err = newJSCommand(cmdCfg.Script)
+		if err != nil {
+			log.Fatal(err)
 		}
-	}))
+	}
 
 	var cmdHandler = CommandHandler{
-		Lead:     "!",
-		Commands: map[string]yirc.Handler{"quote": yirc.HandlerFunc(quoteHandler)},
+		Lead:     cfg.CommandPrefix,
+		Commands: commandMap,
 	}
 	c.UseHandler(cmdHandler)
 
-	err = c.ListenAndHandle(*addr, *nick, cfg.Channels)
-	if err != nil {
-		log.Fatal(err)
+	var wg sync.WaitGroup
+	for _, server := range cfg.Servers {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			err := serverLoop(server, *nick, c)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
 	}
+	wg.Wait()
 }

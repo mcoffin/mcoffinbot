@@ -1,1 +1,11 @@
+command_prefix = "!"
+
+[[server]]
+
+address = "irc.freenode.net:6667"
 channels = ["#ucsd"]
+
+[[command]]
+
+name = "help"
+script = "commands/help.js"

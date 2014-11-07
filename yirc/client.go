@@ -104,7 +104,10 @@ func (self *Client) ListenAndHandle(addr string, nick string, channels []string)
 		msg, err := self.Decode()
 		// Passing nil because the middleware stack already handles it
 		if err == nil {
-			go middlewareStack.HandleIRC(&self.Encoder, msg, nil)
+			err = middlewareStack.HandleIRC(&self.Encoder, msg, nil)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

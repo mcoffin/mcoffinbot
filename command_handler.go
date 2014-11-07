@@ -6,9 +6,19 @@ import (
 	"strings"
 )
 
+type CommandFunc func(*irc.Encoder, string, []string, *irc.Message) error
+
+func (f CommandFunc) HandleCommand(enc *irc.Encoder, command string, args []string, msg *irc.Message) error {
+	return f(enc, command, args, msg)
+}
+
+type Command interface {
+	HandleCommand(enc *irc.Encoder, command string, args []string, msg *irc.Message) error
+}
+
 type CommandHandler struct {
 	Lead     string
-	Commands map[string]yirc.Handler
+	Commands map[string]Command
 }
 
 func (self CommandHandler) HandleIRC(enc *irc.Encoder, msg *irc.Message, next yirc.Handler) error {
@@ -30,6 +40,5 @@ func (self CommandHandler) HandleIRC(enc *irc.Encoder, msg *irc.Message, next yi
 		return next.HandleIRC(enc, msg, nil)
 	}
 
-	msg.Trailing = message
-	return h.HandleIRC(enc, msg, next)
+	return h.HandleCommand(enc, args[0], args[1:], msg)
 }

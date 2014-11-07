@@ -40,7 +40,7 @@ func newJSCommand(script string) (Command, error) {
 		if err != nil {
 			return err
 		}
-		jsArgs := []interface{}{msg.Params[0], cmd}
+		jsArgs := []interface{}{cmd, msg.Prefix.Name, msg.Params[0]}
 		for _, argStr := range args {
 			jsArgs = append(jsArgs, argStr)
 		}

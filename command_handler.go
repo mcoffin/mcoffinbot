@@ -40,5 +40,5 @@ func (self CommandHandler) HandleIRC(enc *irc.Encoder, msg *irc.Message, next yi
 		return next.HandleIRC(enc, msg, nil)
 	}
 
-	return h.HandleCommand(enc, args[0], args[1:], msg)
+	return h.HandleCommand(enc, args[0], strings.Join(args[1:], " "), msg)
 }

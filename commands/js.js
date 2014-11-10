@@ -1,8 +1,5 @@
-function js(command, source, target) {
-    var reconstructed = "";
-    for (var i = 3; i < arguments.length; i++) {
-        reconstructed += arguments[i];
-    }
+function js(command, source, target, suffix) {
+    var reconstructed = suffix;
     var message = "";
     try {
         message = eval(reconstructed);

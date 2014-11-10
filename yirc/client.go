@@ -3,6 +3,7 @@ package yirc
 import (
 	"fmt"
 	"github.com/sorcix/irc"
+	"log"
 )
 
 type middleware struct {
@@ -106,7 +107,7 @@ func (self *Client) ListenAndHandle(addr string, nick string, channels []string)
 		if err == nil {
 			err = middlewareStack.HandleIRC(&self.Encoder, msg, nil)
 			if err != nil {
-				return err
+				log.Println(err)
 			}
 		}
 	}

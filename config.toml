@@ -14,3 +14,8 @@ script = "commands/help.js"
 
 name = "quit"
 script = "commands/quit.js"
+
+[[command]]
+
+name = "js"
+script = "commands/js.js"

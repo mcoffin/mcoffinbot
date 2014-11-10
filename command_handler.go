@@ -6,14 +6,14 @@ import (
 	"strings"
 )
 
-type CommandFunc func(*irc.Encoder, string, []string, *irc.Message) error
+type CommandFunc func(*irc.Encoder, string, string, *irc.Message) error
 
-func (f CommandFunc) HandleCommand(enc *irc.Encoder, command string, args []string, msg *irc.Message) error {
+func (f CommandFunc) HandleCommand(enc *irc.Encoder, command string, args string, msg *irc.Message) error {
 	return f(enc, command, args, msg)
 }
 
 type Command interface {
-	HandleCommand(enc *irc.Encoder, command string, args []string, msg *irc.Message) error
+	HandleCommand(enc *irc.Encoder, command string, args string, msg *irc.Message) error
 }
 
 type CommandHandler struct {

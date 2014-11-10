@@ -22,7 +22,7 @@ func newJSCommand(script string) (Command, error) {
 	}
 
 	vm := otto.New()
-	return CommandFunc(func(enc *irc.Encoder, cmd string, args []string, msg *irc.Message) error {
+	return CommandFunc(func(enc *irc.Encoder, cmd string, args string, msg *irc.Message) error {
 		err := vm.Set("irc", func(call otto.FunctionCall) otto.Value {
 			raw := call.Argument(0).String()
 			msg := irc.ParseMessage(raw)
@@ -40,10 +40,7 @@ func newJSCommand(script string) (Command, error) {
 		if err != nil {
 			return err
 		}
-		jsArgs := []interface{}{cmd, msg.Prefix.Name, msg.Params[0]}
-		for _, argStr := range args {
-			jsArgs = append(jsArgs, argStr)
-		}
+		jsArgs := []interface{}{cmd, msg.Prefix.Name, msg.Params[0], args}
 		_, err = vm.Call(cmd, nil, jsArgs...)
 		if err != nil {
 			return err

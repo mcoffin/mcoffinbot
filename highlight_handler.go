@@ -1,8 +1,8 @@
 package main
 
 import (
-	"./yirc"
 	"fmt"
+	"github.com/mcoffin/mcoffinbot/yirc"
 	"github.com/sorcix/irc"
 	"strings"
 	"sync"

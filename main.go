@@ -1,9 +1,9 @@
 package main
 
 import (
-	"./yirc"
 	"flag"
 	"github.com/BurntSushi/toml"
+	"github.com/mcoffin/mcoffinbot/yirc"
 	"github.com/robertkrimen/otto"
 	"github.com/sorcix/irc"
 	"io/ioutil"

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./yirc"
+	"github.com/mcoffin/mcoffinbot/yirc"
 	"github.com/sorcix/irc"
 	"strings"
 )

@@ -74,6 +74,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+	commandMap["gh"] = CommandFunc(ghCommandHandler)
 
 	var cmdHandler = CommandHandler{
 		Lead:     cfg.CommandPrefix,

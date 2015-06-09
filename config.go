@@ -10,8 +10,14 @@ type command struct {
 	Script string `toml:"script"`
 }
 
+type regexCommand struct {
+	Pattern string `toml:"pattern"`
+	Script  string `toml:"script"`
+}
+
 type config struct {
-	CommandPrefix string    `toml:"command_prefix"`
-	Servers       []server  `toml:"server"`
-	Commands      []command `toml:"command"`
+	CommandPrefix string         `toml:"command_prefix"`
+	Servers       []server       `toml:"server"`
+	Commands      []command      `toml:"command"`
+	RegexCommands []regexCommand `toml:"regex-hook"`
 }
